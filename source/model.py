@@ -8,37 +8,48 @@ class NutritionistModel:
 
     def _create_tables(self):
         self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Usuaris (
-            user_id INTEGER PRIMARY KEY AUTOINCREMENT, 
-            name TEXT NOT NULL,
-            lastname TEXT NOT NULL,
-            email TEXT,
-            birthdate DATE,
-            gender TEXT CHECK(gender IN ('MALE', 'FEMALE'))
+        CREATE TABLE IF NOT EXISTS Pacients (
+            pacient_id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            nom TEXT NOT NULL,
+            cognoms TEXT NOT NULL,
+            email TEXT NOT NULL,
+            data_neixement DATE NOT NULL,
+            sexe TEXT CHECK(sexe IN ('HOME', 'DONA'))
         )
         ''')
         self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS Dietes (
             diet_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
+            pacient_id INTEGER NOT NULL,
             start_date DATE NOT NULL,
             end_date DATE,
             description TEXT,
-            FOREIGN KEY (user_id) REFERENCES Usuaris(user_id)
+            FOREIGN KEY (pacient_id) REFERENCES Pacients(pacient_id)
         )
         ''')
         self.conn.commit()
 
     def add_user(self, name, lastname, email, birthdate, gender):
         self.cursor.execute('''
-        INSERT INTO Usuaris (name, lastname, email, birthdate, gender)
+        INSERT INTO Pacients (nom, cognoms, email, data_neixement, sexe)
         VALUES (?, ?, ?, ?, ?)
         ''', (name, lastname, email, birthdate, gender))
         self.conn.commit()
 
     def get_users(self):
-        self.cursor.execute('SELECT name, lastname FROM Usuaris')
+        self.cursor.execute('SELECT nom, cognoms FROM Pacients')
         return [{'name': row[0], 'lastname': row[1]} for row in self.cursor.fetchall()]
+
+    def add_diet(self, pacient_id, start_date, end_date, description):
+        self.cursor.execute('''
+        INSERT INTO Dietes (pacient_id, start_date, end_date, description)
+        VALUES (?, ?, ?, ?)
+        ''', (pacient_id, start_date, end_date, description))
+        self.conn.commit()
+
+    def get_patient_id(self, name, lastname):
+        self.cursor.execute('SELECT pacient_id FROM Pacients WHERE nom=? AND cognoms=?', (name, lastname))
+        return self.cursor.fetchone()[0]
 
     def close(self):
         self.conn.close()

@@ -8,6 +8,10 @@ from controller import NutritionistController
 
 def main():
     root = Tk()
+
+    root.geometry('800x600')
+    root.resizable(True, True)
+
     try:
         model = NutritionistModel(path.join('..', 'database', 'nutriDB.sql'))
     except FileNotFoundError:

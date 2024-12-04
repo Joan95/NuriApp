@@ -15,3 +15,8 @@ class NutritionistController:
     def get_users(self):
         return self.model.get_users()
 
+    def add_diet(self, pacient_id, start_date, end_date, description):
+        self.model.add_diet(pacient_id, start_date, end_date, description)
+
+    def get_patient_id(self, name, lastname):
+        return self.model.get_patient_id(name, lastname)
