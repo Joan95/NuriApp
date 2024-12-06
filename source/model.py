@@ -51,5 +51,15 @@ class NutritionistModel:
         self.cursor.execute('SELECT pacient_id FROM Pacients WHERE nom=? AND cognoms=?', (name, lastname))
         return self.cursor.fetchone()[0]
 
+    def get_current_diet(self, pacient_id):
+        self.cursor.execute('''
+        SELECT start_date, end_date, description FROM Dietes
+        WHERE pacient_id=? ORDER BY start_date DESC LIMIT 1
+        ''', (pacient_id,))
+        row = self.cursor.fetchone()
+        if row:
+            return {'start_date': row[0], 'end_date': row[1], 'description': row[2]}
+        return None
+
     def close(self):
         self.conn.close()

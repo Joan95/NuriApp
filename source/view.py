@@ -31,6 +31,7 @@ class NutritionistView:
         self.main_menu_frame = Frame(self.main_frame)
         self.add_user_frame = Frame(self.main_frame)
         self.add_diet_frame = Frame(self.main_frame)  # Initialize add_diet_frame
+        self.show_diet_frame = Frame(self.main_frame)  # Initialize show_diet_frame
 
         self.create_main_menu()
         self.create_add_user_menu()
@@ -66,6 +67,50 @@ class NutritionistView:
         # Button to create a new diet
         self.add_diet_button = Button(self.main_menu_frame, text="Crear Nova Dieta", command=self.show_add_diet_menu)
         self.add_diet_button.pack(pady=10)
+
+        # Button to check current diet plan
+        self.check_diet_button = Button(self.main_menu_frame, text="Consultar Dieta Actual",
+                                        command=self.show_diet_plan_menu)
+        self.check_diet_button.pack(pady=10)
+
+    def show_diet_plan_menu(self):
+        selected_indices = self.user_listbox.curselection()
+        if not selected_indices:
+            messagebox.showerror("Compte!", "Sisuplau selecciona un pacient.")
+            return
+
+        selected_index = selected_indices[0]
+        self.selected_patient = self.user_listbox.get(selected_index)
+
+        pacient_info = self.selected_patient.split()
+        pacient_name = pacient_info[0]
+        pacient_lastname = " ".join(pacient_info[1:]) if len(pacient_info) > 1 else ""
+
+        pacient_id = self.controller.get_patient_id(pacient_name, pacient_lastname)
+        diet_plan = self.controller.get_current_diet(pacient_id)
+
+        self.main_menu_frame.pack_forget()
+        self.add_user_frame.pack_forget()
+        self.add_diet_frame.pack_forget()
+        self.show_diet_frame.pack(side="top", fill="both", expand=True)
+
+        self.display_diet_plan(diet_plan)
+
+    def display_diet_plan(self, diet_plan):
+        # Clear the existing widgets
+        for widget in self.show_diet_frame.winfo_children():
+            widget.destroy()
+
+        Label(self.show_diet_frame, text="Dieta Actual").pack(pady=10)
+
+        if diet_plan:
+            Label(self.show_diet_frame, text=f"Data d'inici: {diet_plan['start_date']}").pack(pady=5)
+            Label(self.show_diet_frame, text=f"Data de finalització: {diet_plan['end_date']}").pack(pady=5)
+            Label(self.show_diet_frame, text=f"Descripció: {diet_plan['description']}").pack(pady=5)
+        else:
+            Label(self.show_diet_frame, text="No hi ha una dieta assignada actualment.").pack(pady=5)
+
+        Button(self.show_diet_frame, text="Anar al Menú Principal", command=self.show_main_menu).pack(pady=10)
 
     def create_add_user_menu(self):
         # Configure grid for centering
@@ -108,8 +153,15 @@ class NutritionistView:
     def show_main_menu(self):
         self.add_user_frame.pack_forget()
         self.add_diet_frame.pack_forget()
+        self.clear_show_diet_frame()  # Clear and forget the show_diet_frame
         self.main_menu_frame.pack(side="top", fill="both", expand=True)
         self.load_users()
+
+    def clear_show_diet_frame(self):
+        for widget in self.show_diet_frame.winfo_children():
+            widget.destroy()
+        self.show_diet_frame.pack_forget()
+
 
     def show_add_user_menu(self):
         self.main_menu_frame.pack_forget()

@@ -20,3 +20,6 @@ class NutritionistController:
 
     def get_patient_id(self, name, lastname):
         return self.model.get_patient_id(name, lastname)
+
+    def get_current_diet(self, pacient_id):
+        return self.model.get_current_diet(pacient_id)
